@@ -12,7 +12,7 @@ const Home = () => {
         Capture your thoughts anytime,anywhere
       </Text>
 
-      <TouchableOpacity style={styles.button} onPress={() =>router.push('/note')}>
+      <TouchableOpacity style={styles.button} onPress={() =>router.push('/notes')}>
         <Text style={styles.buttonText}>Get Started</Text>
       </TouchableOpacity>
     </View>
