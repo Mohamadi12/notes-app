@@ -1,4 +1,4 @@
-import { Client, Databases } from "react-native-appwrite";
+import { Account, Client, Databases } from "react-native-appwrite";
 import { Platform } from "react-native";
 
 const config = {
@@ -15,13 +15,14 @@ const client = new Client()
   .setProject(config.projectId);
 
 switch (Platform.OS) {
-  case 'ios':
+  case "ios":
     client.setPlatform(process.env.EXPO_PUBLIC_APPWRITE_BUNDLE_ID);
     break;
-  case 'android':
+  case "android":
     client.setPlatform(process.env.EXPO_PUBLIC_APPWRITE_PACKAGE_NAME);
     break;
 }
 
 const databases = new Databases(client);
+const account = new Account(client);
 export { databases, config, client };
