@@ -1,17 +1,22 @@
+import { useState, useEffect } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../contexts/AuthContext";
+import NoteList from "../../components/NoteList";
 import AddNoteModal from "../../components/AddNoteModal";
 import noteService from "../../services/noteService";
-import NoteList from "../../components/NoteList";
 
 const NoteScreen = () => {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+
   const [notes, setNotes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newNote, setNewNote] = useState("");
@@ -19,11 +24,20 @@ const NoteScreen = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchNotes();
-  }, []);
+    if (!authLoading && !user) {
+      router.replace("/auth");
+    }
+  }, [user, authLoading]);
+
+  useEffect(() => {
+    if (user) {
+      fetchNotes();
+    }
+  }, [user]);
+
   const fetchNotes = async () => {
     setLoading(true);
-    const response = await noteService.getNotes();
+    const response = await noteService.getNotes(user.$id);
 
     if (response.error) {
       setError(response.error);
@@ -36,10 +50,11 @@ const NoteScreen = () => {
     setLoading(false);
   };
 
-  //Add New Note
+  // Add New Note
   const addNote = async () => {
     if (newNote.trim() === "") return;
-    const response = await noteService.addNode(newNote);
+
+    const response = await noteService.addNote(user.$id, newNote);
 
     if (response.error) {
       Alert.alert("Error", response.error);
@@ -112,7 +127,7 @@ const NoteScreen = () => {
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={styles.addButtonText}>Add Note</Text>
+        <Text style={styles.addButtonText}>+ Add Note</Text>
       </TouchableOpacity>
 
       {/* Modal */}
@@ -126,8 +141,6 @@ const NoteScreen = () => {
     </View>
   );
 };
-
-export default NoteScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -156,4 +169,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 16,
   },
+  noNotesText: {
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#555",
+    marginTop: 15,
+  },
 });
+
+export default NoteScreen;
