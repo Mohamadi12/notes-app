@@ -15,10 +15,10 @@ const client = new Client()
   .setProject(config.projectId);
 
 switch (Platform.OS) {
-  case "ios":
+  case 'ios':
     client.setPlatform(process.env.EXPO_PUBLIC_APPWRITE_BUNDLE_ID);
     break;
-  case "android":
+  case 'android':
     client.setPlatform(process.env.EXPO_PUBLIC_APPWRITE_PACKAGE_NAME);
     break;
 }

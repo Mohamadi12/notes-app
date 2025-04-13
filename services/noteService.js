@@ -1,4 +1,5 @@
 import databaseService from "./databaseService";
+import { ID } from "react-native-appwrite";
 
 //Appwrite database and collection id
 const dbId = process.env.EXPO_PUBLIC_APPWRITE_DB_ID;
@@ -9,6 +10,27 @@ const noteService = {
   async getNotes() {
     const response = await databaseService.listDocuments(dbId, colId);
     if (response.error) {
+      return { error: response.error };
+    }
+    return { data: response };
+  },
+
+  // Add New Note
+  async addNode(text) {
+    if (!text) {
+      return { error: "Note text cannot be empty" };
+    }
+    const data = {
+      text: text,
+      createdAt: new Date().toISOString(),
+    };
+    const response = await databaseService.createDocument(
+      dbId,
+      colId,
+      data,
+      ID.unique()
+    );
+    if (response?.error) {
       return { error: response.error };
     }
     return { data: response };

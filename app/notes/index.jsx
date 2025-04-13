@@ -1,8 +1,15 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import NoteList from "../../components/NoteList";
 import AddNoteModal from "../../components/AddNoteModal";
 import noteService from "../../services/noteService";
+import NoteList from "../../components/NoteList";
 
 const NoteScreen = () => {
   const [notes, setNotes] = useState([]);
@@ -17,30 +24,44 @@ const NoteScreen = () => {
   const fetchNotes = async () => {
     setLoading(true);
     const response = await noteService.getNotes();
+
     if (response.error) {
-      setError("Error", response.error);
+      setError(response.error);
       Alert.alert("Error", response.error);
     } else {
       setNotes(response.data);
       setError(null);
     }
+
     setLoading(false);
   };
 
   //Add New Note
-  const addNote = () => {
+  const addNote = async () => {
     if (newNote.trim() === "") return;
-    setNotes((prevNotes) => [
-      ...prevNotes,
-      { id: Date.now.toString(), text: newNote },
-    ]);
+    const response = await noteService.addNode(newNote);
+
+    if (response.error) {
+      Alert.alert("Error", response.error);
+    } else {
+      setNotes([...notes, response.data]);
+    }
+
     setNewNote("");
     setModalVisible(false);
   };
+
   return (
     <View style={styles.container}>
       {/* Note List */}
-      <NoteList notes={notes} />
+      {loading ? (
+        <ActivityIndicator size="large" color="#007bff" />
+      ) : (
+        <>
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          <NoteList notes={notes} />
+        </>
+      )}
 
       <TouchableOpacity
         style={styles.addButton}
@@ -83,5 +104,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
+    fontSize: 16,
   },
 });
